@@ -85,7 +85,7 @@ export default function Login() {
           <div className="mt-10 text-center">
             <p className="text-sm">Are you a teacher?</p>
             <Link
-              href="/sketch"
+              href=""
               className="bg-accent text-white font-bold py-3 px-8 rounded-lg mt-2 text-lg inline-block hover:bg-accent-dark transition-all"
             >
               I am a Teacher
