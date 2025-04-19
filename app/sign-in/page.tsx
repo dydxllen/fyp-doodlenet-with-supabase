@@ -81,16 +81,30 @@ export default function Login() {
             Enter
           </Link>
 
-          {/* Teacher Login */}
-          <div className="mt-10 text-center">
-            <p className="text-sm">Are you a teacher?</p>
-            <Link
-              href=""
-              className="bg-accent text-white font-bold py-3 px-8 rounded-lg mt-2 text-lg inline-block hover:bg-accent-dark transition-all"
-            >
-              I am a Teacher
-            </Link>
+          <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-6 text-center">
+            {/* Teacher Login */}
+            <div>
+              <p className="text-sm mb-2">Are you a teacher?</p>
+              <Link
+                href=""
+                className="bg-accent text-white font-bold py-3 px-6 rounded-lg mt-2 text-lg inline-block hover:bg-accent-dark transition-all"
+              >
+                I am a Teacher
+              </Link>
+            </div>
+
+            {/* Doodle Page Link */}
+            <div >
+              <p className="text-sm mb-2">Want to try doodling?</p>
+              <Link
+                href="/doodle"
+                className="bg-blue-500 text-white font-bold py-3 px-8 rounded-lg mt-2 text-lg inline-block hover:bg-blue-600 transition-all"
+              >
+                Go to Doodle Page
+              </Link>
+            </div>
           </div>
+          
         </form>
       </div>
     </div>
