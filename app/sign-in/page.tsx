@@ -86,7 +86,7 @@ export default function Login() {
             <div>
               <p className="text-sm mb-2">Are you a teacher?</p>
               <Link
-                href=""
+                href="/admin/sign-in"
                 className="bg-accent text-white font-bold py-3 px-6 rounded-lg mt-2 text-lg inline-block hover:bg-accent-dark transition-all"
               >
                 I am a Teacher
