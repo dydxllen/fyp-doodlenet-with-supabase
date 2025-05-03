@@ -1,41 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import "../globals.css"; // Import global styles
 import Navbar from "@/components/Navbar";
+import { createClient } from "@supabase/supabase-js";
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function Login() {
   const [selectedName, setSelectedName] = useState("");
   const [age, setAge] = useState("");
+  const [users, setUsers] = useState<{ name: string; age: number }[]>([]);
+  const [errorMessage, setErrorMessage] = useState(""); // State for error message
 
-  // Dummy database (replace with real API call)
-  const users = [
-    { name: "Alice", age: 5 },
-    { name: "Bob", age: 6 },
-    { name: "Charlie", age: 7 },
-    { name: "Darren", age: 18 },
-  ];
+  // Fetch students from the database
+  useEffect(() => {
+    const fetchStudents = async () => {
+      const { data, error } = await supabase.from("students").select("name, age");
+      if (error) {
+        console.error("Error fetching students:", error);
+      } else {
+        setUsers(data || []);
+      }
+    };
+
+    fetchStudents();
+  }, []);
 
   // Handle dropdown change
   const handleNameChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedUser = users.find((user) => user.name === event.target.value);
     setSelectedName(selectedUser ? selectedUser.name : "");
     setAge(selectedUser ? selectedUser.age.toString() : "");
+    setErrorMessage(""); // Clear error message when a name is selected
+  };
+
+  // Handle Enter button click
+  const handleEnterClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    if (!selectedName) {
+      event.preventDefault(); // Prevent navigation
+      setErrorMessage("Please select a name before proceeding.");
+    }
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white font-poppins text-text ">
       {/* Navbar */}
-      <Navbar/>
-      {/* <div className="w-full bg-primary p-4 flex items-center fixed top-0 left-0 z-10">
-        <img src="/doodle-it-logo.png" alt="Logo" className="h-8 ml-4" />
-        <div className="ml-auto mr-4 cursor-pointer">
-          <div className="h-1 w-6 bg-black mb-1"></div>
-          <div className="h-1 w-6 bg-black mb-1"></div>
-          <div className="h-1 w-6 bg-black"></div>
-        </div>
-      </div> */}
+      <Navbar />
 
       {/* Main Content */}
       <div className="mt-12 w-full px-4">
@@ -68,6 +84,11 @@ export default function Login() {
             ))}
           </select>
 
+          {/* Error Message */}
+          {errorMessage && (
+            <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+          )}
+
           {/* Age Display */}
           <div className="w-full mt-4 bg-gray-300 p-3 rounded-lg text-lg font-semibold text-center">
             {age ? `Age: ${age}` : "Age (Populated data)"}
@@ -75,7 +96,8 @@ export default function Login() {
 
           {/* Enter Button */}
           <Link
-            href="/main-menu"
+            href="/menu"
+            onClick={handleEnterClick}
             className="bg-secondary text-black font-bold rounded-lg py-3 px-10 mt-6 text-lg hover:bg-secondary-dark transition-all text-center inline-block"
           >
             Enter
@@ -94,7 +116,7 @@ export default function Login() {
             </div>
 
             {/* Doodle Page Link */}
-            <div >
+            <div>
               <p className="text-sm mb-2">Want to try doodling?</p>
               <Link
                 href="/doodle"
@@ -104,7 +126,6 @@ export default function Login() {
               </Link>
             </div>
           </div>
-          
         </form>
       </div>
     </div>
