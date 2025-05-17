@@ -1,7 +1,38 @@
-import DoodleCanvas from "@/components/DoodleCanvas";
+"use client";
+
+import { useState, useEffect } from "react";
+import DoodleCanvas from "@/components/DoodleCanvasTest";
 import Navbar from "@/components/Navbar";
 
+const vocabularies = [
+  { name: "Apple", image: "/apple.png" },
+  { name: "Carrot", image: "/carrot.png" },
+  { name: "Cookie", image: "/cookie.png" },
+  { name: "Watermelon", image: "/watermelon.png" },
+  { name: "Banana", image: "/banana.png" },
+];
+
 export default function DoodlePage() {
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [guess, setGuess] = useState({ label: "", confidence: 0 });
+
+  // Randomize the current word index on component mount
+  useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * vocabularies.length);
+    setCurrentWordIndex(randomIndex);
+  }, []);
+
+  const handleSuccess = (label: string, confidence: number) => {
+    // Show success pop-up
+    alert(`Success! You matched the word "${label}" with confidence ${confidence.toFixed(2)}`);
+    // Refresh the page to reset the state
+    window.location.reload();
+  };
+
+  const handleGuess = (label: string, confidence: number) => {
+    setGuess({ label, confidence });
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center">
       {/* Navbar */}
@@ -13,16 +44,20 @@ export default function DoodlePage() {
         <div className="flex flex-col items-center w-full md:w-1/2">
           <div className="w-full max-w-sm border-2 border-gray-300 p-4">
             <h2 className="text-center text-xl font-bold bg-yellow-300 py-2 mb-4">
-              Apple
+              {vocabularies[currentWordIndex].name}
             </h2>
             <div className="border-2 border-gray-300 flex items-center justify-center h-64">
-              <p className="text-gray-500">Image sample</p>
+              <img
+                src={vocabularies[currentWordIndex].image}
+                alt={vocabularies[currentWordIndex].name}
+                className="h-full object-contain"
+              />
             </div>
-          </div>
-          <div className="mt-4 w-full max-w-sm">
-            <div className="w-full bg-gray-300 text-gray-700 py-2 rounded-lg text-center">
-              <p id="label" className="font-bold">Label: ...</p>
-              <p id="confidence" className="text-sm">Confidence: ...</p>
+            <div className="mt-4 text-center">
+              <p className="text-lg font-semibold">Guess: {guess.label || "..."}</p>
+              <p className="text-lg font-semibold">
+                Confidence: {guess.confidence ? `${(guess.confidence * 100).toFixed(2)}%` : "..."}
+              </p>
             </div>
           </div>
         </div>
@@ -34,43 +69,15 @@ export default function DoodlePage() {
               Canvas
             </h2>
             <div className="border-2 border-gray-300">
-              <DoodleCanvas />
+              <DoodleCanvas
+                targetWord={vocabularies[currentWordIndex].name.toLowerCase()}
+                onSuccess={handleSuccess}
+                onGuess={handleGuess}
+              />
             </div>
-          </div>
-          <div className="mt-4 w-full max-w-sm">
-            <button
-              id="clear-button"
-              className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-all"
-            >
-              Clear Canvas
-            </button>
           </div>
         </div>
       </main>
-
-      {/* Footer: Drawing Tools */}
-      <footer className="mt-8 w-full max-w-5xl px-4">
-        <div className="flex justify-center items-center bg-gray-200 py-4 rounded-lg">
-          <div className="flex items-center space-x-4">
-            <div className="flex flex-col items-center">
-              <img
-                src="/icons/pencil-icon.svg"
-                alt="Pencil"
-                className="w-8 h-8"
-              />
-              <p className="text-gray-600 text-sm">Pencil</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <img
-                src="/icons/eraser-icon.svg"
-                alt="Eraser"
-                className="w-8 h-8"
-              />
-              <p className="text-gray-600 text-sm">Eraser</p>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
