@@ -2,14 +2,23 @@
 
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function MenuPage() {
+  const router = useRouter();
+  useEffect(() => {
+    if (typeof window !== "undefined" && !localStorage.getItem("student")) {
+      router.replace("/sign-in");
+    }
+  }, [router]);
+
   const categories = [
     { name: "Food", image: "/food-category.png", link: "/menu/food" },
     { name: "Object", image: "/object-category.png", link: "/menu/object" },
     { name: "Animal", image: "/animal-category.png", link: "/menu/animal" },
     { name: "Test", image: "/post-test.png", link: "/menu/test" },
-  ];
+  ];  
 
   return (
     <div className="min-h-screen bg-gray-100">

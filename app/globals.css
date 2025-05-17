@@ -21,3 +21,23 @@
 body {
   font-family: 'Poppins', sans-serif;
 }
+
+/* Ensure the canvas and image fit nicely on smaller screens */
+@media (max-width: 768px) {
+  #sketch-container {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  button {
+    width: 100%;
+    max-width: 280px;
+    /* margin-bottom: 8px; */
+  }
+}

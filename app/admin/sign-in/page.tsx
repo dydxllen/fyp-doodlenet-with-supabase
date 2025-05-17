@@ -36,10 +36,7 @@ export default function AdminSignIn() {
       return;
     }
 
-    // Store admin session (you can use cookies or localStorage)
-    localStorage.setItem("adminSession", JSON.stringify(admin));
-
-    // Redirect to the admin dashboard
+    localStorage.setItem("admin", JSON.stringify({ username }));
     router.push("/admin");
   };
 

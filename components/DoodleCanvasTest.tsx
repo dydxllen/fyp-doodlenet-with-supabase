@@ -1,30 +1,24 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { RxEraser } from "react-icons/rx";
-import { MdSkipNext } from "react-icons/md";
 
 export default function DoodleCanvas({
   targetWord,
   onSuccess,
   onGuess,
-  onSkip,
 }: {
   targetWord: string;
   onSuccess: (label: string, confidence: number) => void;
   onGuess: (label: string, confidence: number) => void;
-  onSkip?: () => void;
 }) {
   const sketchContainerRef = useRef<HTMLDivElement>(null);
-  const classifierRef = useRef<any>(null);
+  const classifierRef = useRef<any>(null); // To store the classifier instance
 
   useEffect(() => {
     let p5Instance: any = null;
 
     const initSketch = () => {
       const sketch = (p: any) => {
-        // const canvasSize = 280; // Fixed size for all devices
-
         p.preload = () => {
           classifierRef.current = window.ml5.imageClassifier("DoodleNet");
         };
@@ -33,10 +27,6 @@ export default function DoodleCanvas({
           const canvas = p.createCanvas(280, 280);
           canvas.parent(sketchContainerRef.current);
           p.background(255);
-          p.noFill();
-          p.stroke(200);
-          p.strokeWeight(2);
-          p.rect(1, 1, 278, 278); // Draw border inside canvas
 
           const clearButton = document.getElementById("clear-button");
           clearButton?.addEventListener("click", () => p.background(255));
@@ -48,15 +38,15 @@ export default function DoodleCanvas({
           if (p.mouseIsPressed) {
             p.line(p.pmouseX, p.pmouseY, p.mouseX, p.mouseY);
           }
-          // Redraw border on every frame
-          p.noFill();
-          p.stroke(200);
-          p.strokeWeight(2);
-          p.rect(1, 1, 278, 278);
         };
 
-        p.touchStarted = () => false;
-        p.touchMoved = () => false;
+        // Prevent scrolling while drawing
+        p.touchStarted = () => {
+          return false;
+        };
+        p.touchMoved = () => {
+          return false;
+        };
       };
 
       p5Instance = new window.p5(sketch);
@@ -92,9 +82,6 @@ export default function DoodleCanvas({
   const handleGuess = () => {
     const canvas = document.querySelector("canvas");
     if (canvas && classifierRef.current) {
-      // Log the drawing submission
-      console.log("Drawing submitted for guessing.", canvas);
-
       classifierRef.current.classify(canvas, (error: any, results: any) => {
         if (error) {
           console.error(error);
@@ -104,71 +91,41 @@ export default function DoodleCanvas({
         const label = results[0].label.toLowerCase();
         const confidence = results[0].confidence;
 
-        // Log the result of the guess
-        console.log("Guess result:", { label, confidence });
+        // Log guesses to the network tab
+        console.log(`Guess: ${label}, Confidence: ${confidence.toFixed(2)}`);
 
+        // Call onGuess callback to update UI
         onGuess(label, confidence);
 
+        // Check if the guess matches the target word
         if (label === targetWord) {
+          // Trigger success callback
           onSuccess(label, confidence);
         }
       });
     }
   };
 
-  const handleClear = () => {
-    const canvas = document.querySelector("canvas");
-    if (canvas) {
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-      }
-    }
-  };
-
   return (
-    <div className="flex flex-col items-center w-full">
-      <div className="flex flex-row items-start justify-center">
-        {/* Canvas */}
-        <div
-          id="sketch-container"
-          ref={sketchContainerRef}
-          className="flex justify-center items-center mb-2 border-2 border-gray-300 bg-white rounded"
-          style={{ width: 280, height: 280, position: "relative", zIndex: 1 }}
-        >
-          {/* Canvas will be appended here */}
-        </div>
-        {/* Icon Buttons */}
-        <div className="flex flex-col ml-2 space-y-2 mt-2 z-10">
-          <button
-            id="clear-button"
-            onClick={handleClear}
-            aria-label="Clear Canvas"
-            className="p-2 bg-gray-200 rounded-full hover:bg-red-200 transition"
-            type="button"
-          >
-            <RxEraser className="w-6 h-6 text-gray-700" />
-          </button>
-          {onSkip && (
-            <button
-              onClick={onSkip}
-              aria-label="Skip"
-              className="p-2 bg-gray-200 rounded-full hover:bg-blue-200 transition"
-              type="button"
-            >
-              <MdSkipNext className="w-6 h-6 text-gray-700" />
-            </button>
-          )}
-        </div>
+    <div className="flex flex-col items-center">
+      <div
+        id="sketch-container"
+        ref={sketchContainerRef}
+        className="flex justify-center items-center mb-4"
+      >
+        {/* The canvas will be appended here */}
       </div>
-      {/* Guess Button below canvas */}
       <button
         onClick={handleGuess}
-        className="mt-3 bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 transition-all z-10"
-        type="button"
+        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-all mb-2"
       >
         Guess
+      </button>
+      <button
+        id="clear-button"
+        className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-all"
+      >
+        Clear Canvas
       </button>
     </div>
   );

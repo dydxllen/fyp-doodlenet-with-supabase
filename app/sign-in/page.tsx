@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import "../globals.css"; // Import global styles
+import { useRouter } from "next/navigation";
+import "../globals.css";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@supabase/supabase-js";
 
@@ -17,6 +18,7 @@ export default function Login() {
   const [age, setAge] = useState("");
   const [users, setUsers] = useState<{ name: string; age: number }[]>([]);
   const [errorMessage, setErrorMessage] = useState(""); // State for error message
+  const router = useRouter();
 
   // Fetch students from the database
   useEffect(() => {
@@ -32,6 +34,13 @@ export default function Login() {
     fetchStudents();
   }, []);
 
+  // On mount, redirect to /menu if already signed in
+  useEffect(() => {
+    if (typeof window !== "undefined" && localStorage.getItem("student")) {
+      router.replace("/menu");
+    }
+  }, [router]);
+
   // Handle dropdown change
   const handleNameChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedUser = users.find((user) => user.name === event.target.value);
@@ -42,19 +51,24 @@ export default function Login() {
 
   // Handle Enter button click
   const handleEnterClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    event.preventDefault();
     if (!selectedName) {
-      event.preventDefault(); // Prevent navigation
       setErrorMessage("Please select a name before proceeding.");
+      return;
     }
+    // Store student in localStorage
+    localStorage.setItem("student", JSON.stringify({ name: selectedName, age }));
+    // Redirect to menu and replace history so back doesn't return here
+    router.replace("/menu");
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white font-poppins text-text ">
+    <div className="min-h-screen bg-gray-100">
       {/* Navbar */}
       <Navbar />
 
       {/* Main Content */}
-      <div className="mt-12 w-full px-4">
+      <div className="w-full px-4 mt-4 sm:mt-12">
         {/* Logo & Title */}
         <div className="my-8 text-center">
           <img
@@ -67,7 +81,7 @@ export default function Login() {
         {/* Form */}
         <form className="flex flex-col w-full max-w-md mx-auto">
           {/* Name Dropdown */}
-          <label className="font-semibold text-lg mb-2">Select Name</label>
+          {/* <label className="font-semibold text-lg mb-2">Select Name</label> */}
           <select
             className="w-full bg-gray-300 p-3 rounded-lg text-lg font-semibold"
             value={selectedName}
@@ -90,18 +104,22 @@ export default function Login() {
           )}
 
           {/* Age Display */}
-          <div className="w-full mt-4 bg-gray-300 p-3 rounded-lg text-lg font-semibold text-center">
-            {age ? `Age: ${age}` : "Age (Populated data)"}
-          </div>
+            <div className="w-full mt-4 bg-gray-300 p-3 rounded-lg text-lg font-semibold text-center">
+            {age ? (
+              `Age: ${age}`
+            ) : (
+              <span className="text-gray-500">Age</span>
+            )}
+            </div>
 
           {/* Enter Button */}
-          <Link
+          <a
             href="/menu"
             onClick={handleEnterClick}
             className="bg-secondary text-black font-bold rounded-lg py-3 px-10 mt-6 text-lg hover:bg-secondary-dark transition-all text-center inline-block"
           >
             Enter
-          </Link>
+          </a>
 
           <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-6 text-center">
             {/* Teacher Login */}
