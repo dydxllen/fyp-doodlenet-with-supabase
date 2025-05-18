@@ -1,7 +1,7 @@
 "use client"; // Mark this file as a client component
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation"; // To get the current route
-import { FiLogOut } from "react-icons/fi"; // Logout icon from react-icons
+import { FiLogOut, FiArrowLeft } from "react-icons/fi"; // Logout and back icons from react-icons
 import { useEffect, useState } from "react";
 import { useLogout } from "@/utils/logout";
 
@@ -10,6 +10,14 @@ export default function Navbar() {
   const router = useRouter();
   const showLogoutButton = pathname !== "/sign-in";
   const [student, setStudent] = useState<{ name: string } | null>(null);
+
+  // Determine if back button should be shown
+  const doodleGamePages = [
+    "menu/doodle-game/food",
+    "menu/doodle-game/animal",
+    "menu/doodle-game/object",
+  ];
+  const showBackButton = !doodleGamePages.includes(pathname);
 
   // Scroll state
   const [show, setShow] = useState(true);
@@ -44,6 +52,17 @@ export default function Navbar() {
 
   const logout = useLogout();
 
+  // Add handleBack function
+  const handleBack = () => {
+    const segments = pathname.split("/").filter(Boolean);
+    if (segments.length > 1) {
+      const newPath = "/" + segments.slice(0, -1).join("/");
+      router.push(newPath);
+    } else {
+      router.push("/");
+    }
+  };
+
   return (
     <div
       className={`w-full bg-primary p-4 flex items-center justify-between transition-transform duration-300 z-10 ${
@@ -52,6 +71,15 @@ export default function Navbar() {
       style={{ position: "sticky", top: 0 }}
     >
       <div className="flex items-center gap-4">
+        {showBackButton && (
+          <button
+            onClick={handleBack}
+            className="mr-2 flex items-center justify-center rounded-full bg-white hover:bg-gray-200 text-primary p-2 transition"
+            aria-label="Back"
+          >
+            <FiArrowLeft className="text-xl" />
+          </button>
+        )}
         <img src="/doodle-it-logo.png" alt="Logo" className="h-8 ml-4 rounded-full" />
         {student && (
           <span className="font-semibold text-white bg-blue-400 px-4 py-2 rounded-full">
