@@ -95,6 +95,30 @@ export default function DoodleCanvas({
       // Log the drawing submission
       console.log("Drawing submitted for guessing.", canvas);
 
+      // Try to extract the pixel array from the canvas and log it
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (ctx) {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        // imageData.data is a Uint8ClampedArray of RGBA values
+        // For terminal-friendly output, you might want to log a simplified version
+        // For example, log a 2D array of grayscale values (0-255)
+        const grayscaleArray: number[][] = [];
+        for (let y = 0; y < canvas.height; y++) {
+          const row: number[] = [];
+          for (let x = 0; x < canvas.width; x++) {
+        const idx = (y * canvas.width + x) * 4;
+        const r = imageData.data[idx];
+        const g = imageData.data[idx + 1];
+        const b = imageData.data[idx + 2];
+        // Simple average for grayscale
+        const gray = Math.round((r + g + b) / 3);
+        row.push(gray);
+          }
+          grayscaleArray.push(row);
+        }
+        console.log("Grayscale pixel array:", grayscaleArray);
+      }
+
       classifierRef.current.classify(canvas, (error: any, results: any) => {
         if (error) {
           console.error(error);
@@ -119,7 +143,7 @@ export default function DoodleCanvas({
   const handleClear = () => {
     const canvas = document.querySelector("canvas");
     if (canvas) {
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.beginPath();
