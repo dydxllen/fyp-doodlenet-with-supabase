@@ -40,12 +40,26 @@ export default function DoodleCanvas({
           }
         };
 
-        // Prevent scrolling while drawing
-        p.touchStarted = () => {
-          return false;
+        // Prevent scrolling while drawing, but allow button touches
+        p.touchStarted = (event: any) => {
+          if (
+            event &&
+            event.target &&
+            event.target.nodeName === "CANVAS"
+          ) {
+            return false;
+          }
+          return true;
         };
-        p.touchMoved = () => {
-          return false;
+        p.touchMoved = (event: any) => {
+          if (
+            event &&
+            event.target &&
+            event.target.nodeName === "CANVAS"
+          ) {
+            return false;
+          }
+          return true;
         };
       };
 
@@ -118,12 +132,14 @@ export default function DoodleCanvas({
       <button
         onClick={handleGuess}
         className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-all mb-2"
+        type="button"
       >
         Guess
       </button>
       <button
         id="clear-button"
         className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-all"
+        type="button"
       >
         Clear Canvas
       </button>
