@@ -6,7 +6,7 @@ import { useState } from "react";
 export default function FoodCategoryPage() {
   const vocabularies = [
     { name: "Apple", image: "/apple.png", stars: 3 },
-    { name: "Cookie", image: "/cookie.png", stars: 2 },
+    { name: "Ice Cream", image: "/ice-cream.png", stars: 2 },
     { name: "Carrot", image: "/carrot.png", stars: 1 },
     { name: "Watermelon", image: "/watermelon.png", stars: 0 },
     { name: "Banana", image: "/banana.png", stars: 3 },
