@@ -6,7 +6,7 @@ import DoodleCanvas from "@/components/DoodleCanvas";
 
 const vocabularies = [
   { name: "Apple", image: "/apple.png" },
-  { name: "Cookie", image: "/cookie.png" },
+  { name: "Ice Cream", image: "/ice-cream.png" },
   { name: "Carrot", image: "/carrot.png" },
   { name: "Watermelon", image: "/watermelon.png" },
   { name: "Banana", image: "/banana.png" },

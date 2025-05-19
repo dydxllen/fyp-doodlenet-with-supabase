@@ -6,10 +6,21 @@ import Navbar from "@/components/Navbar";
 
 const vocabularies = [
   { name: "Apple", image: "/apple.png" },
+  { name: "Ice Cream", image: "/ice-cream.png" },
   { name: "Carrot", image: "/carrot.png" },
-  { name: "Cookie", image: "/cookie.png" },
   { name: "Watermelon", image: "/watermelon.png" },
   { name: "Banana", image: "/banana.png" },
+  { name: "Fish", image: "/fish.png" },
+  { name: "Cat", image: "/cat.png" },
+  { name: "Lion", image: "/lion.png" },
+  { name: "Bird", image: "/bird.png" },
+  { name: "Butterfly", image: "/butterfly.png" },
+  { name: "Spider", image: "/spider.png" },
+  { name: "Bicycle", image: "/bicycle.png"},
+  { name: "Car", image: "/car.png"},
+  { name: "Clock", image: "/clock.png"},
+  { name: "Flower", image: "/flower.png"},
+  { name: "Tree", image: "/tree.png"},
 ];
 
 export default function DoodlePage() {
