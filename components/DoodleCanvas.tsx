@@ -55,8 +55,28 @@ export default function DoodleCanvas({
           p.rect(1, 1, 278, 278);
         };
 
-        p.touchStarted = () => false;
-        p.touchMoved = () => false;
+        p.touchStarted = (event: any) => {
+          // Only prevent default if touch is inside canvas
+          if (
+            event &&
+            event.target &&
+            event.target.nodeName === "CANVAS"
+          ) {
+            return false;
+          }
+          // Allow default for touches outside canvas (e.g., buttons)
+          return true;
+        };
+        p.touchMoved = (event: any) => {
+          if (
+            event &&
+            event.target &&
+            event.target.nodeName === "CANVAS"
+          ) {
+            return false;
+          }
+          return true;
+        };
       };
 
       p5Instance = new window.p5(sketch);
