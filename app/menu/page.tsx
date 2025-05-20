@@ -17,7 +17,7 @@ export default function MenuPage() {
     { name: "Food", image: "/food-category.png", link: "/menu/food" },
     { name: "Object", image: "/object-category.png", link: "/menu/object" },
     { name: "Animal", image: "/animal-category.png", link: "/menu/animal" },
-    { name: "Test", image: "/post-test.png", link: "/menu/test" },
+    { name: "Test", image: "/post-test.png", link: "/menu/post-test" },
   ];  
 
   return (

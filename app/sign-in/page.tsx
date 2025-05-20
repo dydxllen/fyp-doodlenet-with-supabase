@@ -27,7 +27,11 @@ export default function Login() {
       if (error) {
         console.error("Error fetching students:", error);
       } else {
-        setUsers(data || []);
+        // Sort users by name ascending
+        const sorted = (data || []).sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+        setUsers(sorted);
       }
     };
 
@@ -50,7 +54,7 @@ export default function Login() {
   };
 
   // Handle Enter button click
-  const handleEnterClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+  const handleEnterClick = async (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     event.preventDefault();
     if (!selectedName) {
       setErrorMessage("Please select a name before proceeding.");
@@ -58,8 +62,25 @@ export default function Login() {
     }
     // Store student in localStorage
     localStorage.setItem("student", JSON.stringify({ name: selectedName, age }));
-    // Redirect to menu and replace history so back doesn't return here
-    router.replace("/menu");
+
+    // Fetch student from Supabase to check pretest_score
+    const { data, error } = await supabase
+      .from("students")
+      .select("pretest_score")
+      .eq("name", selectedName)
+      .single();
+
+    if (error) {
+      setErrorMessage("Error fetching student data.");
+      return;
+    }
+
+    // Redirect based on pretest_score
+    if (!data || data.pretest_score === null) {
+      router.replace("/pre-test");
+    } else {
+      router.replace("/menu");
+    }
   };
 
   return (
@@ -81,8 +102,11 @@ export default function Login() {
         {/* Form */}
         <form className="flex flex-col w-full max-w-md mx-auto">
           {/* Name Dropdown */}
-          {/* <label className="font-semibold text-lg mb-2">Select Name</label> */}
+          <label htmlFor="student-name-select" className="sr-only">
+            Select Name
+          </label>
           <select
+            id="student-name-select"
             className="w-full bg-gray-300 p-3 rounded-lg text-lg font-semibold"
             value={selectedName}
             onChange={handleNameChange}
