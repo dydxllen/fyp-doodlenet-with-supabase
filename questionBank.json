@@ -1,0 +1,82 @@
+[
+  {
+    "image": "Apple",
+    "choices": ["Banana", "Apple", "Fish", "Car"],
+    "answer": "Apple"
+  },
+  {
+    "image": "Ice cream",
+    "choices": ["Spider", "Ice cream", "Flower", "Tree"],
+    "answer": "Ice cream"
+  },
+  {
+    "image": "Carrot",
+    "choices": ["Banana", "Carrot", "Bicycle", "Bird"],
+    "answer": "Carrot"
+  },
+  {
+    "image": "Watermelon",
+    "choices": ["Watermelon", "Butterfly", "Clock", "Cat"],
+    "answer": "Watermelon"
+  },
+  {
+    "image": "Banana",
+    "choices": ["Apple", "Lion", "Banana", "Spider"],
+    "answer": "Banana"
+  },
+  {
+    "image": "Bicycle",
+    "choices": ["Car", "Flower", "Bicycle", "Ice cream"],
+    "answer": "Bicycle"
+  },
+  {
+    "image": "Car",
+    "choices": ["Car", "Butterfly", "Tree", "Watermelon"],
+    "answer": "Car"
+  },
+  {
+    "image": "Clock",
+    "choices": ["Cat", "Clock", "Fish", "Apple"],
+    "answer": "Clock"
+  },
+  {
+    "image": "Flower",
+    "choices": ["Banana", "Bicycle", "Ice cream", "Flower"],
+    "answer": "Flower"
+  },
+  {
+    "image": "Tree",
+    "choices": ["Spider", "Tree", "Watermelon", "Clock"],
+    "answer": "Tree"
+  },
+  {
+    "image": "Fish",
+    "choices": ["Butterfly", "Fish", "Carrot", "Lion"],
+    "answer": "Fish"
+  },
+  {
+    "image": "Cat",
+    "choices": ["Ice cream", "Bird", "Cat", "Car"],
+    "answer": "Cat"
+  },
+  {
+    "image": "Lion",
+    "choices": ["Lion", "Carrot", "Banana", "Clock"],
+    "answer": "Lion"
+  },
+  {
+    "image": "Bird",
+    "choices": ["Cat", "Bird", "Spider", "Apple"],
+    "answer": "Bird"
+  },
+  {
+    "image": "Butterfly",
+    "choices": ["Tree", "Car", "Butterfly", "Watermelon"],
+    "answer": "Butterfly"
+  },
+  {
+    "image": "Spider",
+    "choices": ["Spider", "Carrot", "Ice cream", "Banana"],
+    "answer": "Spider"
+  }
+]
