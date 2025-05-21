@@ -11,6 +11,7 @@ const vocabularies = [
     { name: "Flower", image: "/flower.png"},
     { name: "Tree", image: "/tree.png"},
 ];
+const vocabNames = vocabularies.map(v => v.name);
 
 export default function ObjectDoodleGame() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -93,6 +94,7 @@ export default function ObjectDoodleGame() {
                 onSuccess={handleSuccess}
                 onGuess={handleGuess}
                 onSkip={handleSkip}
+                vocabularies={vocabNames}
               />
             </div>
             {showSuccess && (

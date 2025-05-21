@@ -9,11 +9,13 @@ export default function DoodleCanvas({
   onSuccess,
   onGuess,
   onSkip,
+  vocabularies = [],
 }: {
   targetWord: string;
   onSuccess: (label: string, confidence: number) => void;
   onGuess: (label: string, confidence: number) => void;
   onSkip?: () => void;
+  vocabularies?: string[];
 }) {
   const sketchContainerRef = useRef<HTMLDivElement>(null);
   const classifierRef = useRef<any>(null);
@@ -119,20 +121,16 @@ export default function DoodleCanvas({
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (ctx) {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        // imageData.data is a Uint8ClampedArray of RGBA values
-        // For terminal-friendly output, you might want to log a simplified version
-        // For example, log a 2D array of grayscale values (0-255)
         const grayscaleArray: number[][] = [];
         for (let y = 0; y < canvas.height; y++) {
           const row: number[] = [];
           for (let x = 0; x < canvas.width; x++) {
-        const idx = (y * canvas.width + x) * 4;
-        const r = imageData.data[idx];
-        const g = imageData.data[idx + 1];
-        const b = imageData.data[idx + 2];
-        // Simple average for grayscale
-        const gray = Math.round((r + g + b) / 3);
-        row.push(gray);
+            const idx = (y * canvas.width + x) * 4;
+            const r = imageData.data[idx];
+            const g = imageData.data[idx + 1];
+            const b = imageData.data[idx + 2];
+            const gray = Math.round((r + g + b) / 3);
+            row.push(gray);
           }
           grayscaleArray.push(row);
         }
@@ -145,15 +143,42 @@ export default function DoodleCanvas({
           return;
         }
 
-        const label = results[0].label.toLowerCase();
-        const confidence = results[0].confidence;
+        // Normalize function to convert to doodlenet label format (lowercase, hyphens)
+        const normalize = (str: string) =>
+          str.trim().toLowerCase().replace(/[\s_]+/g, "-");
+
+        // Only allow guesses within vocabularies (case-insensitive), skip "camouflage" and "syringe"
+        const vocabSet = new Set(
+          vocabularies.map((v) => normalize(v))
+        );
+        const excludedWords = new Set(["camouflage", "syringe"]);
+        const filtered = results.filter(
+          (r: any) =>
+            !excludedWords.has(normalize(r.label)) &&
+            vocabSet.has(normalize(r.label))
+        );
+
+        // Log the top 3 guesses with their confidence
+        const top3 = filtered.slice(0, 3).map((r: any) => ({
+          label: r.label,
+          confidence: r.confidence,
+        }));
+        console.log("Top 3 guesses:", top3);
+
+        let label = "...";
+        let confidence = 0;
+        if (filtered.length > 0) {
+          label = filtered[0].label.toLowerCase();
+          confidence = filtered[0].confidence;
+        }
 
         // Log the result of the guess
         console.log("Guess result:", { label, confidence });
 
         onGuess(label, confidence);
 
-        if (label === targetWord) {
+        // Normalize both label and targetWord for comparison (handle "ice cream" vs "ice-cream")
+        if (normalize(label) === normalize(targetWord)) {
           onSuccess(label, confidence);
         }
       });

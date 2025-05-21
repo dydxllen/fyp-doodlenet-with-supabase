@@ -26,6 +26,7 @@ const vocabularies = [
 export default function DoodlePage() {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [guess, setGuess] = useState({ label: "", confidence: 0 });
+  const [topGuesses, setTopGuesses] = useState<{ label: string; confidence: number }[]>([]);
 
   // Randomize the current word index on component mount
   useEffect(() => {
@@ -42,6 +43,22 @@ export default function DoodlePage() {
 
   const handleGuess = (label: string, confidence: number) => {
     setGuess({ label, confidence });
+  };
+
+  // Add handler for top guesses
+  const handleTopGuesses = (guesses: { label: string; confidence: number }[]) => {
+    setTopGuesses(guesses);
+  };
+
+  // Add skip handler
+  const handleSkip = () => {
+    let nextIndex = Math.floor(Math.random() * vocabularies.length);
+    // Ensure it's not the same as the current word
+    while (nextIndex === currentWordIndex && vocabularies.length > 1) {
+      nextIndex = Math.floor(Math.random() * vocabularies.length);
+    }
+    setCurrentWordIndex(nextIndex);
+    setGuess({ label: "", confidence: 0 });
   };
 
   return (
@@ -69,6 +86,18 @@ export default function DoodlePage() {
               <p className="text-lg font-semibold">
                 Confidence: {guess.confidence ? `${(guess.confidence * 100).toFixed(2)}%` : "..."}
               </p>
+              {/* Top 3 guesses */}
+              <div className="mt-4">
+                <p className="font-bold">Top 3 Guesses:</p>
+                <ol className="list-decimal list-inside">
+                  {topGuesses.length === 0 && <li className="text-gray-500">No guesses yet</li>}
+                  {topGuesses.map((g, i) => (
+                    <li key={i}>
+                      {g.label} ({(g.confidence * 100).toFixed(2)}%)
+                    </li>
+                  ))}
+                </ol>
+              </div>
             </div>
           </div>
         </div>
@@ -84,6 +113,9 @@ export default function DoodlePage() {
                 targetWord={vocabularies[currentWordIndex].name.toLowerCase()}
                 onSuccess={handleSuccess}
                 onGuess={handleGuess}
+                onSkip={handleSkip}
+                vocabularies={vocabularies.map((v) => v.name)}
+                onTopGuesses={handleTopGuesses}
               />
             </div>
           </div>

@@ -12,11 +12,13 @@ const vocabularies = [
     { name: "Butterfly", image: "/butterfly.png" },
     { name: "Spider", image: "/spider.png" },
 ];
+const vocabNames = vocabularies.map(v => v.name);
 
 export default function AnimalDoodleGame() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [guess, setGuess] = useState({ label: "", confidence: 0 });
   const [showSuccess, setShowSuccess] = useState(false);
+  const [topGuesses, setTopGuesses] = useState<{ label: string; confidence: number }[]>([]);
 
   const currentVocab = vocabularies[currentIndex];
 
@@ -94,6 +96,7 @@ export default function AnimalDoodleGame() {
                 onSuccess={handleSuccess}
                 onGuess={handleGuess}
                 onSkip={handleSkip}
+                vocabularies={vocabNames}
               />
             </div>
             {showSuccess && (
