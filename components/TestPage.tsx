@@ -112,12 +112,31 @@ const TestPage: React.FC<TestPageProps> = ({ questionsCount = 10, mode = "post" 
           } catch {}
         }
         if (student && student.name) {
-          const updateField =
-            mode === "pre" ? { pretest_score: score } : { posttest_score: score };
-          await supabase
-            .from("students")
-            .update(updateField)
-            .eq("name", student.name);
+          // Get student_id from DB (if not already stored in localStorage)
+          let student_id = student.student_id;
+          if (!student_id) {
+            const { data } = await supabase
+              .from("students")
+              .select("student_id")
+              .eq("name", student.name)
+              .single();
+            student_id = data?.student_id;
+            // Optionally store in localStorage for next time
+            if (student_id) {
+              localStorage.setItem("student", JSON.stringify({ ...student, student_id }));
+            }
+          }
+          if (student_id) {
+            // Insert answers
+            const records = shuffled.map((q, idx) => ({
+              student_id,
+              test_type: mode,
+              question: q.answer, // or q.image or q.text, depending on your questionBank
+              answer: answers[idx],
+              is_correct: answers[idx] === q.answer,
+            }));
+            await supabase.from("student_answers").insert(records);
+          }
         }
         setSaving(false);
       }
