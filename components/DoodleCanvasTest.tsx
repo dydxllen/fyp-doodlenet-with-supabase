@@ -6,10 +6,16 @@ export default function DoodleCanvas({
   targetWord,
   onSuccess,
   onGuess,
+  onSkip,
+  vocabularies = [],
+  onTopGuesses,
 }: {
   targetWord: string;
   onSuccess: (label: string, confidence: number) => void;
   onGuess: (label: string, confidence: number) => void;
+  onSkip?: () => void;
+  vocabularies?: string[];
+  onTopGuesses?: (guesses: { label: string; confidence: number }[]) => void;
 }) {
   const sketchContainerRef = useRef<HTMLDivElement>(null);
   const classifierRef = useRef<any>(null); // To store the classifier instance
@@ -17,10 +23,37 @@ export default function DoodleCanvas({
   useEffect(() => {
     let p5Instance: any = null;
 
+    // Prevent loading scripts and classifier multiple times
+    const loadMl5AndP5 = async () => {
+      // Only load p5.js if not already loaded
+      if (!window.p5) {
+        await new Promise<void>((resolve) => {
+          const p5Script = document.createElement("script");
+          p5Script.src = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js";
+          p5Script.async = true;
+          p5Script.onload = () => resolve();
+          document.body.appendChild(p5Script);
+        });
+      }
+      // Only load ml5.js if not already loaded
+      if (!window.ml5) {
+        await new Promise<void>((resolve) => {
+          const ml5Script = document.createElement("script");
+          ml5Script.src = "https://unpkg.com/ml5@0.12.2/dist/ml5.min.js";
+          ml5Script.async = true;
+          ml5Script.onload = () => resolve();
+          document.body.appendChild(ml5Script);
+        });
+      }
+    };
+
     const initSketch = () => {
       const sketch = (p: any) => {
         p.preload = () => {
-          classifierRef.current = window.ml5.imageClassifier("DoodleNet");
+          // Only create classifier if not already created
+          if (!classifierRef.current) {
+            classifierRef.current = window.ml5.imageClassifier("DoodleNet");
+          }
         };
 
         p.setup = () => {
@@ -66,30 +99,16 @@ export default function DoodleCanvas({
       p5Instance = new window.p5(sketch);
     };
 
-    const loadScripts = async () => {
-      const p5Script = document.createElement("script");
-      p5Script.src = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js";
-      p5Script.async = true;
-      document.body.appendChild(p5Script);
-
-      const ml5Script = document.createElement("script");
-      ml5Script.src = "https://unpkg.com/ml5@0.12.2/dist/ml5.min.js";
-      ml5Script.async = true;
-      document.body.appendChild(ml5Script);
-
-      p5Script.onload = () => {
-        ml5Script.onload = () => {
-          initSketch();
-        };
-      };
-    };
-
-    loadScripts();
+    loadMl5AndP5().then(() => {
+      initSketch();
+    });
 
     return () => {
       if (p5Instance) {
         p5Instance.remove();
       }
+      // Optionally clear classifierRef.current if you want to force reload on remount
+      // classifierRef.current = null;
     };
   }, []);
 
@@ -102,17 +121,48 @@ export default function DoodleCanvas({
           return;
         }
 
-        const label = results[0].label.toLowerCase();
-        const confidence = results[0].confidence;
+        // Normalize function to convert to doodlenet label format (lowercase, hyphens)
+        const normalize = (str: string) =>
+          str.trim().toLowerCase().replace(/[\s_]+/g, "-");
 
-        // Log guesses to the network tab
+        // Only allow guesses within vocabularies (case-insensitive), skip "camouflage" and "syringe"
+        const vocabSet = new Set(
+          vocabularies.map((v) => normalize(v))
+        );
+        const excludedWords = new Set(["camouflage", "syringe"]);
+        const filtered = results.filter(
+          (r: any) =>
+            !excludedWords.has(normalize(r.label)) &&
+            vocabSet.has(normalize(r.label))
+        );
+
+        // Log the top 3 guesses with their confidence
+        const top3 = filtered.slice(0, 3).map((r: any) => ({
+          label: r.label,
+          confidence: r.confidence,
+        }));
+        console.log("Top 3 guesses:", top3);
+
+        // Call onTopGuesses if provided
+        if (onTopGuesses) {
+          onTopGuesses(top3);
+        }
+
+        let label = "...";
+        let confidence = 0;
+        if (filtered.length > 0) {
+          label = filtered[0].label.toLowerCase();
+          confidence = filtered[0].confidence;
+        }
+
+        // Log guess result
         console.log(`Guess: ${label}, Confidence: ${confidence.toFixed(2)}`);
 
         // Call onGuess callback to update UI
         onGuess(label, confidence);
 
-        // Check if the guess matches the target word
-        if (label === targetWord) {
+        // Normalize both label and targetWord for comparison (handle "ice cream" vs "ice-cream")
+        if (normalize(label) === normalize(targetWord)) {
           // Trigger success callback
           onSuccess(label, confidence);
         }
@@ -129,19 +179,33 @@ export default function DoodleCanvas({
       >
         {/* The canvas will be appended here */}
       </div>
+      {/* Skip and Clear Canvas side by side */}
+      <div className="flex flex-row space-x-2 mb-2">
+        {onSkip && (
+          <button
+            onClick={onSkip}
+            className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-blue-200 transition-all"
+            type="button"
+            aria-label="Skip"
+          >
+            Skip
+          </button>
+        )}
+        <button
+          id="clear-button"
+          className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-all"
+          type="button"
+        >
+          Clear Canvas
+        </button>
+      </div>
+      {/* Guess button at the bottom */}
       <button
         onClick={handleGuess}
-        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-all mb-2"
+        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-all mt-2"
         type="button"
       >
         Guess
-      </button>
-      <button
-        id="clear-button"
-        className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-all"
-        type="button"
-      >
-        Clear Canvas
       </button>
     </div>
   );

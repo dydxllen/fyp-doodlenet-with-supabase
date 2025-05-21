@@ -11,6 +11,7 @@ const vocabularies = [
   { name: "Watermelon", image: "/watermelon.png" },
   { name: "Banana", image: "/banana.png" },
 ];
+const vocabNames = vocabularies.map((v) => v.name);
 
 export default function FoodDoodleGame() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -47,7 +48,12 @@ export default function FoodDoodleGame() {
         <div className="flex flex-col items-center justify-center h-full py-20">
           <h2 className="text-2xl font-bold mb-4">Great job!</h2>
           <p>You have completed all the food doodles!</p>
-          <a href="/menu/food" className="mt-6 bg-blue-500 text-white px-4 py-2 rounded">Back to Food Menu</a>
+          <a
+            href="/menu/food"
+            className="mt-6 bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Back to Food Menu
+          </a>
         </div>
       </div>
     );
@@ -75,7 +81,10 @@ export default function FoodDoodleGame() {
                 Guess: {guess.label ? guess.label : "..."}
               </p>
               <p className="text-lg font-semibold">
-                Confidence: {guess.confidence ? `${(guess.confidence * 100).toFixed(2)}%` : "..."}
+                Confidence:{" "}
+                {guess.confidence
+                  ? `${(guess.confidence * 100).toFixed(2)}%`
+                  : "..."}
               </p>
             </div>
           </div>
@@ -93,6 +102,7 @@ export default function FoodDoodleGame() {
                 onSuccess={handleSuccess}
                 onGuess={handleGuess}
                 onSkip={handleSkip}
+                vocabularies={vocabNames}
               />
             </div>
             {showSuccess && (
