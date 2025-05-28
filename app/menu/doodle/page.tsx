@@ -59,6 +59,16 @@ export default function DoodlePage() {
     setGuessAttempted(false);
   };
 
+  // Add back handler to go to previous word in sequence, looping to last if at first
+  const handleBack = () => {
+    setCurrentWordIndex((prevIndex) =>
+      prevIndex === 0 ? vocabularies.length - 1 : prevIndex - 1
+    );
+    setGuess(null);
+    setTopGuesses(null);
+    setGuessAttempted(false);
+  };
+
   const handleNext = () => {
     setShowSuccess(false);
     setSuccessInfo(null);
@@ -147,6 +157,7 @@ export default function DoodlePage() {
                 onSuccess={handleSuccess}
                 onGuess={handleGuess}
                 onSkip={handleSkip}
+                onBack={handleBack}
                 vocabularies={vocabularies.map((v) => v.name)}
                 onTopGuesses={handleTopGuesses}
               />
