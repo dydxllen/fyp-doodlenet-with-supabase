@@ -3,12 +3,14 @@
 import { useEffect, useRef } from "react";
 import { MdSkipNext } from "react-icons/md";
 import { RxEraser } from "react-icons/rx";
+import { IoMdSkipBackward } from "react-icons/io";
 
 export default function DoodleCanvas({
   targetWord,
   onSuccess,
   onGuess,
   onSkip,
+  onBack, // <-- make sure this is here
   vocabularies = [],
   onTopGuesses,
 }: {
@@ -16,6 +18,7 @@ export default function DoodleCanvas({
   onSuccess: (label: string, confidence: number) => void;
   onGuess: (label: string, confidence: number) => void;
   onSkip?: () => void;
+  onBack?: () => void; // <-- make sure this is here
   vocabularies?: string[];
   onTopGuesses?: (guesses: { label: string; confidence: number }[]) => void;
 }) {
@@ -205,7 +208,7 @@ export default function DoodleCanvas({
         >
           {/* The canvas will be appended here */}
         </div>
-        {/* Skip and Clear Canvas vertically on the right */}
+        {/* Skip, Erase, and Back vertically on the right */}
         <div className="flex flex-col space-y-2 ml-2">
           {onSkip && (
             <button
@@ -215,6 +218,16 @@ export default function DoodleCanvas({
               aria-label="Skip"
             >
               <MdSkipNext size={24} />
+            </button>
+          )}
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="bg-gray-200 text-gray-700 p-2 rounded-lg hover:bg-blue-200 transition-all flex items-center justify-center"
+              type="button"
+              aria-label="Back"
+            >
+              <IoMdSkipBackward  size={20} />
             </button>
           )}
           <button
