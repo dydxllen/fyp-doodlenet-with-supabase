@@ -1,82 +1,52 @@
 [
   {
     "image": "Apple",
-    "choices": ["Banana", "Apple", "Fish", "Car"],
+    "choices": ["Carrot", "Apple", "Fish", "Car"],
     "answer": "Apple"
   },
   {
-    "image": "Ice cream",
-    "choices": ["Spider", "Ice cream", "Flower", "Tree"],
-    "answer": "Ice cream"
-  },
-  {
     "image": "Carrot",
-    "choices": ["Banana", "Carrot", "Bicycle", "Bird"],
+    "choices": ["Carrot", "Tree", "Flower", "Lion"],
     "answer": "Carrot"
   },
   {
-    "image": "Watermelon",
-    "choices": ["Watermelon", "Butterfly", "Clock", "Cat"],
-    "answer": "Watermelon"
-  },
-  {
-    "image": "Banana",
-    "choices": ["Apple", "Lion", "Banana", "Spider"],
-    "answer": "Banana"
-  },
-  {
-    "image": "Bicycle",
-    "choices": ["Car", "Flower", "Bicycle", "Ice cream"],
-    "answer": "Bicycle"
-  },
-  {
     "image": "Car",
-    "choices": ["Car", "Butterfly", "Tree", "Watermelon"],
+    "choices": ["Car", "Spider", "Tree", "Apple"],
     "answer": "Car"
   },
   {
     "image": "Clock",
-    "choices": ["Cat", "Clock", "Fish", "Apple"],
+    "choices": ["Cat", "Clock", "Fish", "Lion"],
     "answer": "Clock"
   },
   {
     "image": "Flower",
-    "choices": ["Banana", "Bicycle", "Ice cream", "Flower"],
+    "choices": ["Carrot", "Spider", "Tree", "Flower"],
     "answer": "Flower"
   },
   {
     "image": "Tree",
-    "choices": ["Spider", "Tree", "Watermelon", "Clock"],
+    "choices": ["Spider", "Tree", "Fish", "Cat"],
     "answer": "Tree"
   },
   {
     "image": "Fish",
-    "choices": ["Butterfly", "Fish", "Carrot", "Lion"],
+    "choices": ["Lion", "Fish", "Carrot", "Cat"],
     "answer": "Fish"
   },
   {
     "image": "Cat",
-    "choices": ["Ice cream", "Bird", "Cat", "Car"],
+    "choices": ["Tree", "Lion", "Cat", "Car"],
     "answer": "Cat"
   },
   {
     "image": "Lion",
-    "choices": ["Lion", "Carrot", "Banana", "Clock"],
+    "choices": ["Lion", "Carrot", "Spider", "Clock"],
     "answer": "Lion"
   },
   {
-    "image": "Bird",
-    "choices": ["Cat", "Bird", "Spider", "Apple"],
-    "answer": "Bird"
-  },
-  {
-    "image": "Butterfly",
-    "choices": ["Tree", "Car", "Butterfly", "Watermelon"],
-    "answer": "Butterfly"
-  },
-  {
     "image": "Spider",
-    "choices": ["Spider", "Carrot", "Ice cream", "Banana"],
+    "choices": ["Spider", "Carrot", "Tree", "Apple"],
     "answer": "Spider"
   }
 ]
