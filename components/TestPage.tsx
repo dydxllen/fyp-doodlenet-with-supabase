@@ -92,10 +92,19 @@ const TestPage: React.FC<TestPageProps> = ({ questionsCount = 10, mode = "post" 
   const handleEnd = async () => {
     if (selected == null || showFeedback) return;
     setShowFeedback(true);
-    if (selected === shuffled[current].answer) setScore(score + 1);
-    const newAnswers = [...answers];
-    newAnswers[current] = selected;
-    setAnswers(newAnswers);
+
+    // Prepare the final answers array
+    const finalAnswers = [...answers];
+    finalAnswers[current] = selected;
+
+    // Calculate the final score
+    const finalScore = finalAnswers.reduce(
+      (acc, ans, idx) => acc + (ans === shuffled[idx].answer ? 1 : 0),
+      0
+    );
+
+    setAnswers(finalAnswers);
+    setScore(finalScore);
 
     setTimeout(async () => {
       setShowFeedback(false);
@@ -112,12 +121,38 @@ const TestPage: React.FC<TestPageProps> = ({ questionsCount = 10, mode = "post" 
           } catch {}
         }
         if (student && student.name) {
-          const updateField =
-            mode === "pre" ? { pretest_score: score } : { posttest_score: score };
-          await supabase
-            .from("students")
-            .update(updateField)
-            .eq("name", student.name);
+          // Get student_id from DB (if not already stored in localStorage)
+          let student_id = student.student_id;
+          if (!student_id) {
+            const { data } = await supabase
+              .from("students")
+              .select("student_id")
+              .eq("name", student.name)
+              .single();
+            student_id = data?.student_id;
+            // Optionally store in localStorage for next time
+            if (student_id) {
+              localStorage.setItem("student", JSON.stringify({ ...student, student_id }));
+            }
+          }
+          if (student_id) {
+            // Insert answers
+            const records = shuffled.map((q, idx) => ({
+              student_id,
+              test_type: mode,
+              question: q.answer,
+              answer: finalAnswers[idx],
+              is_correct: finalAnswers[idx] === q.answer,
+            }));
+            await supabase.from("student_answers").insert(records);
+
+            // Update summary score in students table
+            const scoreField = mode === "pre" ? "pretest_score" : "posttest_score";
+            await supabase
+              .from("students")
+              .update({ [scoreField]: finalScore })
+              .eq("student_id", student_id);
+          }
         }
         setSaving(false);
       }
