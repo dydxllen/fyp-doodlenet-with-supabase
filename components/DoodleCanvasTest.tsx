@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { MdSkipNext } from "react-icons/md";
+import { RxEraser } from "react-icons/rx";
 
 export default function DoodleCanvas({
   targetWord,
@@ -19,6 +21,7 @@ export default function DoodleCanvas({
 }) {
   const sketchContainerRef = useRef<HTMLDivElement>(null);
   const classifierRef = useRef<any>(null); // To store the classifier instance
+  const p5InstanceRef = useRef<any>(null); // Store p5 instance for clearing
 
   useEffect(() => {
     let p5Instance: any = null;
@@ -48,6 +51,10 @@ export default function DoodleCanvas({
     };
 
     const initSketch = () => {
+      // Guard: Clear any existing canvas in the container before creating a new one
+      if (sketchContainerRef.current) {
+        sketchContainerRef.current.innerHTML = "";
+      }
       const sketch = (p: any) => {
         p.preload = () => {
           // Only create classifier if not already created
@@ -60,9 +67,6 @@ export default function DoodleCanvas({
           const canvas = p.createCanvas(280, 280);
           canvas.parent(sketchContainerRef.current);
           p.background(255);
-
-          const clearButton = document.getElementById("clear-button");
-          clearButton?.addEventListener("click", () => p.background(255));
         };
 
         p.draw = () => {
@@ -97,6 +101,7 @@ export default function DoodleCanvas({
       };
 
       p5Instance = new window.p5(sketch);
+      p5InstanceRef.current = p5Instance;
     };
 
     loadMl5AndP5().then(() => {
@@ -104,13 +109,26 @@ export default function DoodleCanvas({
     });
 
     return () => {
-      if (p5Instance) {
-        p5Instance.remove();
+      // Ensure p5 instance is always removed
+      if (p5InstanceRef.current) {
+        p5InstanceRef.current.remove();
       }
-      // Optionally clear classifierRef.current if you want to force reload on remount
-      // classifierRef.current = null;
+      p5InstanceRef.current = null;
+      // Always reset classifier so model reloads on next mount
+      classifierRef.current = null;
+      // Manually clear the sketch container
+      if (sketchContainerRef.current) {
+        sketchContainerRef.current.innerHTML = "";
+      }
     };
   }, []);
+
+  // Clear canvas handler using p5 instance
+  const handleClear = () => {
+    if (p5InstanceRef.current) {
+      p5InstanceRef.current.background(255);
+    }
+  };
 
   const handleGuess = () => {
     const canvas = document.querySelector("canvas");
@@ -118,6 +136,9 @@ export default function DoodleCanvas({
       classifierRef.current.classify(canvas, (error: any, results: any) => {
         if (error) {
           console.error(error);
+          // No predictions found, send empty guess to parent
+          if (onTopGuesses) onTopGuesses([]);
+          onGuess("", 0);
           return;
         }
 
@@ -153,6 +174,10 @@ export default function DoodleCanvas({
         if (filtered.length > 0) {
           label = filtered[0].label.toLowerCase();
           confidence = filtered[0].confidence;
+        } else {
+          // No predictions found, send empty guess to parent
+          onGuess("", 0);
+          return;
         }
 
         // Log guess result
@@ -172,32 +197,36 @@ export default function DoodleCanvas({
 
   return (
     <div className="flex flex-col items-center">
-      <div
-        id="sketch-container"
-        ref={sketchContainerRef}
-        className="flex justify-center items-center mb-4"
-      >
-        {/* The canvas will be appended here */}
-      </div>
-      {/* Skip and Clear Canvas side by side */}
-      <div className="flex flex-row space-x-2 mb-2">
-        {onSkip && (
-          <button
-            onClick={onSkip}
-            className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-blue-200 transition-all"
-            type="button"
-            aria-label="Skip"
-          >
-            Skip
-          </button>
-        )}
-        <button
-          id="clear-button"
-          className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-all"
-          type="button"
+      <div className="flex flex-row items-start mb-4">
+        <div
+          id="sketch-container"
+          ref={sketchContainerRef}
+          className="flex justify-center items-center"
         >
-          Clear Canvas
-        </button>
+          {/* The canvas will be appended here */}
+        </div>
+        {/* Skip and Clear Canvas vertically on the right */}
+        <div className="flex flex-col space-y-2 ml-2">
+          {onSkip && (
+            <button
+              onClick={onSkip}
+              className="bg-gray-200 text-gray-700 p-2 rounded-lg hover:bg-blue-200 transition-all flex items-center justify-center"
+              type="button"
+              aria-label="Skip"
+            >
+              <MdSkipNext size={24} />
+            </button>
+          )}
+          <button
+            id="clear-button"
+            onClick={handleClear}
+            className="bg-yellow-500 text-white p-2 rounded-lg hover:bg-yellow-600 transition-all flex items-center justify-center"
+            type="button"
+            aria-label="Clear Canvas"
+          >
+            <RxEraser size={24} />
+          </button>
+        </div>
       </div>
       {/* Guess button at the bottom */}
       <button

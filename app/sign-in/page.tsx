@@ -158,7 +158,7 @@ export default function Login() {
             </div>
 
             {/* Doodle Page Link */}
-            <div>
+            {/* <div>
               <p className="text-sm mb-2">Want to try doodling?</p>
               <Link
                 href="/doodle"
@@ -166,7 +166,7 @@ export default function Login() {
               >
                 Go to Doodle Page
               </Link>
-            </div>
+            </div> */}
           </div>
         </form>
       </div>
