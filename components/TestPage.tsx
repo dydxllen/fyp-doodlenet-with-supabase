@@ -92,10 +92,19 @@ const TestPage: React.FC<TestPageProps> = ({ questionsCount = 10, mode = "post" 
   const handleEnd = async () => {
     if (selected == null || showFeedback) return;
     setShowFeedback(true);
-    if (selected === shuffled[current].answer) setScore(score + 1);
-    const newAnswers = [...answers];
-    newAnswers[current] = selected;
-    setAnswers(newAnswers);
+
+    // Prepare the final answers array
+    const finalAnswers = [...answers];
+    finalAnswers[current] = selected;
+
+    // Calculate the final score
+    const finalScore = finalAnswers.reduce(
+      (acc, ans, idx) => acc + (ans === shuffled[idx].answer ? 1 : 0),
+      0
+    );
+
+    setAnswers(finalAnswers);
+    setScore(finalScore);
 
     setTimeout(async () => {
       setShowFeedback(false);
@@ -131,11 +140,18 @@ const TestPage: React.FC<TestPageProps> = ({ questionsCount = 10, mode = "post" 
             const records = shuffled.map((q, idx) => ({
               student_id,
               test_type: mode,
-              question: q.answer, // or q.image or q.text, depending on your questionBank
-              answer: answers[idx],
-              is_correct: answers[idx] === q.answer,
+              question: q.answer,
+              answer: finalAnswers[idx],
+              is_correct: finalAnswers[idx] === q.answer,
             }));
             await supabase.from("student_answers").insert(records);
+
+            // Update summary score in students table
+            const scoreField = mode === "pre" ? "pretest_score" : "posttest_score";
+            await supabase
+              .from("students")
+              .update({ [scoreField]: finalScore })
+              .eq("student_id", student_id);
           }
         }
         setSaving(false);
