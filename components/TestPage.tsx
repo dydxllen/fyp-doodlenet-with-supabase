@@ -136,7 +136,7 @@ const TestPage: React.FC<TestPageProps> = ({ questionsCount = 10, mode = "post" 
             }
           }
           if (student_id) {
-            // Insert answers
+            // Insert answers with retry and select for confirmation
             const records = shuffled.map((q, idx) => ({
               student_id,
               test_type: mode,
@@ -144,14 +144,39 @@ const TestPage: React.FC<TestPageProps> = ({ questionsCount = 10, mode = "post" 
               answer: finalAnswers[idx],
               is_correct: finalAnswers[idx] === q.answer,
             }));
-            await supabase.from("student_answers").insert(records);
 
-            // Update summary score in students table
+            const { error: insertError, data: insertedAnswers } = await retryRequest(
+              async () => await supabase.from("student_answers").insert(records).select()
+            );
+            if (insertError) {
+              console.error("Insert error:", insertError, "Records:", records);
+              alert("Failed to save answers after several attempts. Please check your connection and try again.");
+              setSaving(false);
+              return;
+            }
+            if (!insertedAnswers || insertedAnswers.length !== records.length) {
+              console.warn("Not all answers were saved!", { insertedAnswers, records });
+              alert("Some answers may not have been saved. Please check your connection.");
+              setSaving(false);
+              return;
+            }
+
+            // Update summary score in students table with retry
             const scoreField = mode === "pre" ? "pretest_score" : "posttest_score";
-            await supabase
-              .from("students")
-              .update({ [scoreField]: finalScore })
-              .eq("student_id", student_id);
+            const { error: updateError } = await retryRequest(
+              () =>
+                supabase
+                  .from("students")
+                  .update({ [scoreField]: finalScore })
+                  .eq("student_id", student_id)
+                  .select()
+                  .then((res) => res)
+            );
+            if (updateError) {
+              alert("Failed to update score after several attempts. Please check your connection and try again.");
+              setSaving(false);
+              return;
+            }
           }
         }
         setSaving(false);
@@ -338,3 +363,15 @@ const TestPage: React.FC<TestPageProps> = ({ questionsCount = 10, mode = "post" 
 };
 
 export default TestPage;
+
+// Helper function for retrying Supabase requests
+async function retryRequest(fn: () => PromiseLike<any>, retries = 3, delay = 1000): Promise<any> {
+  let lastError;
+  for (let i = 0; i < retries; i++) {
+    const { error, ...rest } = await fn();
+    if (!error) return { error: null, ...rest };
+    lastError = error;
+    await new Promise((res) => setTimeout(res, delay));
+  }
+  return { error: lastError };
+}
