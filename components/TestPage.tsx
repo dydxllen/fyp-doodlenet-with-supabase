@@ -368,9 +368,14 @@ export default TestPage;
 async function retryRequest(fn: () => PromiseLike<any>, retries = 3, delay = 1000): Promise<any> {
   let lastError;
   for (let i = 0; i < retries; i++) {
-    const { error, ...rest } = await fn();
-    if (!error) return { error: null, ...rest };
-    lastError = error;
+    try {
+      const { error, ...rest } = await fn();
+      if (!error) return { error: null, ...rest };
+      lastError = error;
+    } catch (err) {
+      lastError = err;
+      console.error("Request threw an exception:", err);
+    }
     await new Promise((res) => setTimeout(res, delay));
   }
   return { error: lastError };
