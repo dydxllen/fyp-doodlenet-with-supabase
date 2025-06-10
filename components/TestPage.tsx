@@ -136,9 +136,32 @@ const TestPage: React.FC<TestPageProps> = ({ questionsCount = 10, mode = "post" 
             }
           }
           if (student_id) {
-            // Insert answers with retry and select for confirmation
+            // 1. Insert a new test_attempts row and get attempt_id
+            const { data: attemptData, error: attemptError } = await retryRequest(
+              () =>
+                supabase
+                  .from("test_attempts")
+                  .insert([
+                    {
+                      student_id,
+                      test_type: mode,
+                      score: finalScore,
+                    },
+                  ])
+                  .select("attempt_id")
+                  .single()
+            );
+            if (attemptError || !attemptData) {
+              alert("Failed to save test attempt. Please try again.");
+              setSaving(false);
+              return;
+            }
+            const attempt_id = attemptData.attempt_id;
+
+            // 2. Insert answers with the new attempt_id
             const records = shuffled.map((q, idx) => ({
               student_id,
+              attempt_id,
               test_type: mode,
               question: q.answer,
               answer: finalAnswers[idx],
@@ -162,7 +185,7 @@ const TestPage: React.FC<TestPageProps> = ({ questionsCount = 10, mode = "post" 
             }
 
             // Update summary score in students table with retry
-            const scoreField = mode === "pre" ? "pretest_score" : "posttest_score";
+            const scoreField = mode === "pre" ? "latest_pretest_score" : "latest_posttest_score";
             const { error: updateError } = await retryRequest(
               () =>
                 supabase

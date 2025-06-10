@@ -10,6 +10,7 @@ const supabase = createClient(
 
 export default function StudentListTable() {
   const [students, setStudents] = useState<any[]>([]);
+  const [scores, setScores] = useState<Record<number, { pre: number | null, post: number | null }>>({});
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ student_id: "", name: "", age: "" });
   const [formError, setFormError] = useState<string | null>(null);
@@ -42,8 +43,35 @@ export default function StudentListTable() {
     }
   };
 
+  // Fetch latest pre/post test scores for all students
+  const fetchScores = async () => {
+    // Get latest pre and post test_attempts for each student
+    const { data, error } = await supabase
+      .from("test_attempts")
+      .select("student_id, test_type, score, created_at")
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("Error fetching test_attempts:", error);
+      return;
+    }
+    // Map: student_id -> { pre: score, post: score }
+    const scoreMap: Record<number, { pre: number | null, post: number | null }> = {};
+    if (data) {
+      for (const row of data) {
+        const sid = row.student_id;
+        const ttype = row.test_type;
+        if (!scoreMap[sid]) scoreMap[sid] = { pre: null, post: null };
+        // Only set if not already set (latest first due to order)
+        if (ttype === "pre" && scoreMap[sid].pre === null) scoreMap[sid].pre = row.score;
+        if (ttype === "post" && scoreMap[sid].post === null) scoreMap[sid].post = row.score;
+      }
+    }
+    setScores(scoreMap);
+  };
+
   useEffect(() => {
     fetchStudents();
+    fetchScores();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -115,8 +143,8 @@ export default function StudentListTable() {
     setEditForm({
       name: student.name ?? "",
       age: student.age?.toString() ?? "",
-      pretest_score: student.pretest_score?.toString() ?? "",
-      posttest_score: student.posttest_score?.toString() ?? "",
+      pretest_score: student.latest_pretest_score?.toString() ?? "",
+      posttest_score: student.latest_posttest_score?.toString() ?? "",
     });
     setEditModal(student);
     setEditSuccess(false);
@@ -135,8 +163,8 @@ export default function StudentListTable() {
       .update({
         name: editForm.name,
         age: Number(editForm.age),
-        pretest_score: editForm.pretest_score === "" ? null : Number(editForm.pretest_score),
-        posttest_score: editForm.posttest_score === "" ? null : Number(editForm.posttest_score),
+        latest_pretest_score: editForm.pretest_score === "" ? null : Number(editForm.pretest_score),
+        latest_posttest_score: editForm.posttest_score === "" ? null : Number(editForm.posttest_score),
       })
       .eq("student_id", editModal.student_id);
     setEditLoading(false);
@@ -177,8 +205,7 @@ export default function StudentListTable() {
       <table className="min-w-full border text-sm rounded-md shadow-sm">
         <thead className="bg-gray-100 text-left">
           <tr>
-            <th
-              className="py-2 px-4 border cursor-pointer select-none"
+            <th className="py-2 px-4 border cursor-pointer select-none"
               onClick={() =>
                 setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
               }
@@ -191,8 +218,8 @@ export default function StudentListTable() {
             </th>
             <th className="py-2 px-4 border">Name</th>
             <th className="py-2 px-4 border">Age</th>
-            <th className="py-2 px-4 border">Pre-test Score (x/15)</th>
-            <th className="py-2 px-4 border">Post-test Score (x/15)</th>
+            <th className="py-2 px-4 border">Pre-test Score (x/10)</th>
+            <th className="py-2 px-4 border">Post-test Score (x/10)</th>
             <th className="py-2 px-4 border">Edit</th>
             <th className="py-2 px-4 border">Delete</th>
           </tr>
@@ -203,8 +230,12 @@ export default function StudentListTable() {
               <td className="py-2 px-4 border">{student.student_id}</td>
               <td className="py-2 px-4 border">{student.name}</td>
               <td className="py-2 px-4 border">{student.age}</td>
-              <td className="py-2 px-4 border">{student.pretest_score ?? '-'}</td>
-              <td className="py-2 px-4 border">{student.posttest_score ?? '-'}</td>
+              <td className="py-2 px-4 border">
+                {student.latest_pretest_score ?? "-"}
+              </td>
+              <td className="py-2 px-4 border">
+                {student.latest_posttest_score ?? "-"}
+              </td>
               <td className="py-1 px-1 border align-middle text-center">
                 <button title="Edit Student"
                   className="bg-yellow-300 hover:bg-yellow-400 text-black px-3 py-3 rounded-lg font-semibold"
@@ -347,7 +378,7 @@ export default function StudentListTable() {
                   value={editForm.pretest_score}
                   onChange={handleEditFormChange}
                   min={0}
-                  max={15}
+                  max={10}
                   className="w-full border rounded px-3 py-2"
                   placeholder="(optional)"
                 />
@@ -360,7 +391,7 @@ export default function StudentListTable() {
                   value={editForm.posttest_score}
                   onChange={handleEditFormChange}
                   min={0}
-                  max={15}
+                  max={10}
                   className="w-full border rounded px-3 py-2"
                   placeholder="(optional)"
                 />
