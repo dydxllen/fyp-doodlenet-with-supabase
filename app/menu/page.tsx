@@ -14,9 +14,9 @@ export default function MenuPage() {
   }, [router]);
 
   const categories = [
-    { name: "Food", image: "/food-category.png", link: "/menu/food" },
-    { name: "Object", image: "/object-category.png", link: "/menu/object" },
-    { name: "Animal", image: "/animal-category.png", link: "/menu/animal" },
+    // { name: "Food", image: "/food-category.png", link: "/menu/food" },
+    // { name: "Object", image: "/object-category.png", link: "/menu/object" },
+    // { name: "Animal", image: "/animal-category.png", link: "/menu/animal" },
     { name: "Doodle Game", image: "/doodle-game.png", link: "menu/doodle" },
     { name: "Test", image: "/post-test.png", link: "/menu/post-test" },
   ];  
@@ -29,7 +29,7 @@ export default function MenuPage() {
       {/* Main Content */}
       <div className="flex flex-col items-center justify-center pt-20 px-4">
         <h1 className="text-2xl font-bold mb-8">Select a Category</h1>
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-2">
           {categories.map((category) => (
             <Link
               key={category.name}
