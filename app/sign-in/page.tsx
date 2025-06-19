@@ -63,10 +63,10 @@ export default function Login() {
     // Store student in localStorage
     localStorage.setItem("student", JSON.stringify({ name: selectedName, age }));
 
-    // Fetch student_id from students table
+    // Fetch student_id and latest_pretest_score from students table
     const { data: studentData, error: studentError } = await supabase
       .from("students")
-      .select("student_id")
+      .select("student_id, latest_pretest_score")
       .eq("name", selectedName)
       .single();
 
@@ -75,23 +75,8 @@ export default function Login() {
       return;
     }
 
-    const student_id = studentData.student_id;
-
-    // Check for pre-test attempt in test_attempts
-    const { data: preTestData, error: preTestError } = await supabase
-      .from("test_attempts")
-      .select("score")
-      .eq("student_id", student_id)
-      .eq("test_type", "pre")
-      .maybeSingle();
-
-    if (preTestError) {
-      setErrorMessage("Error fetching pre-test data.");
-      return;
-    }
-
-    // Redirect based on pre-test score
-    if (!preTestData || preTestData.score === null) {
+    // Check latest_pretest_score
+    if (studentData.latest_pretest_score === null) {
       router.replace("/pre-test");
     } else {
       router.replace("/menu");
