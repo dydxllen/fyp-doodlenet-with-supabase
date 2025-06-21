@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, LabelList } from "recharts";
 import { createClient } from "@/utils/supabase/client";
 
 export default function PrePostScoreBarChart() {
@@ -60,8 +60,20 @@ export default function PrePostScoreBarChart() {
         <YAxis domain={[0, 10]} label={{ value: "Score (n/10)", angle: -90, position: "insideLeft" }} />
         <Tooltip />
         <Legend />
-        <Bar dataKey="PreTest" fill="#8884d8" name="Pre-test" />
-        <Bar dataKey="PostTest" fill="#82ca9d" name="Post-test" />
+        <Bar dataKey="PreTest" fill="#8884d8" name="Pre-test">
+          <LabelList 
+            dataKey="PreTest" 
+            position="top" 
+            formatter={(value: number) => value.toPrecision(3)} 
+          />
+        </Bar>
+        <Bar dataKey="PostTest" fill="#82ca9d" name="Post-test">
+          <LabelList 
+            dataKey="PostTest" 
+            position="top" 
+            formatter={(value: number) => value.toPrecision(3)} 
+          />
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   );
